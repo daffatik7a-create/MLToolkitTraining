@@ -5,9 +5,6 @@ on:
   push:
     branches: [main, master]
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,13 +16,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Android SDK
+      - uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
         run: |
-          yes | sdkmanager --licenses || true
+          sdkmanager --licenses || true
           sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0'
 
       - name: Extract project ZIP
-        run: unzip -q MLToolkitTraining-cloud-build.zip
+        run: unzip -o -q MLToolkitTraining-cloud-build.zip
 
       - uses: gradle/actions/setup-gradle@v4
         with:
