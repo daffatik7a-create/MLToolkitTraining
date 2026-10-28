@@ -18,20 +18,20 @@ jobs:
 
       - name: Setup Android SDK
         run: |
-          echo $ANDROID_HOME
-          ls $ANDROID_HOME/cmdline-tools/latest/bin/
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0'
 
       - name: Extract project ZIP
-        run: unzip -o -q MLToolkitTraining-cloud-build.zip
+        run: |
+          unzip -o -q MLToolkitTraining-cloud-build.zip
+          chmod +x MLToolkitTraining/gradlew
 
       - uses: gradle/actions/setup-gradle@v5
 
       - name: Build APK
         run: |
           cd MLToolkitTraining
-          gradle assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - uses: actions/upload-artifact@v5
         with:
