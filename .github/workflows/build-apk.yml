@@ -23,22 +23,22 @@ jobs:
 
       - name: Extract project
         run: |
-          ls -la
-          unzip -o -q MLToolkitTraining-cloud-build.zip || echo "ZIP sudah di-extract"
-          ls -la MLToolkitTraining/
-          ls -la MLToolkitTraining/app/ || true
+          unzip -o -q MLToolkitTraining-cloud-build.zip
+          echo "--- structure ---"
+          find . -name "settings.gradle.kts" | head -n 5
 
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: '8.10'
 
       - name: Build APK
         run: |
-          cd MLToolkitTraining
+          PROJECT_DIR=$(dirname $(find . -name "settings.gradle.kts" | head -n 1))
+          echo "Project dir: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
           gradle assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v5
         with:
           name: MLToolkitTraining-debug-apk
-          path: MLToolkitTraining/app/build/outputs/apk/debug/*.apk
+          path: "**/app/build/outputs/apk/debug/*.apk"
