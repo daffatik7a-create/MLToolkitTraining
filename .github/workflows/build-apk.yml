@@ -24,8 +24,18 @@ jobs:
       - name: Extract project
         run: |
           unzip -o -q MLToolkitTraining-cloud-build.zip
-          echo "--- structure ---"
-          find . -name "settings.gradle.kts" | head -n 5
+
+      - name: Fix JVM Target to 17
+        run: |
+          PROJECT_DIR=$(dirname $(find . -name "settings.gradle.kts" | head -n 1))
+          echo "Fixing in $PROJECT_DIR"
+          # ganti semua 1.8 jadi 17
+          sed -i 's/VERSION_1_8/VERSION_17/g' $PROJECT_DIR/app/build.gradle.kts || true
+          sed -i 's/JvmTarget.JVM_1_8/JvmTarget.JVM_17/g' $PROJECT_DIR/app/build.gradle.kts || true
+          sed -i 's/jvmTarget = "1.8"/jvmTarget = "17"/g' $PROJECT_DIR/app/build.gradle.kts || true
+          sed -i 's/"1.8"/"17"/g' $PROJECT_DIR/app/build.gradle.kts || true
+          sed -i 's/1_8/17/g' $PROJECT_DIR/app/build.gradle.kts || true
+          cat $PROJECT_DIR/app/build.gradle.kts | grep -A2 -B2 "jvmTarget\|sourceCompat\|targetCompat\|VERSION"
 
       - uses: gradle/actions/setup-gradle@v4
         with:
@@ -34,7 +44,6 @@ jobs:
       - name: Build APK
         run: |
           PROJECT_DIR=$(dirname $(find . -name "settings.gradle.kts" | head -n 1))
-          echo "Project dir: $PROJECT_DIR"
           cd "$PROJECT_DIR"
           gradle assembleDebug --no-daemon --stacktrace
 
