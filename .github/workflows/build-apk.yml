@@ -21,19 +21,24 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0'
 
-      - name: Extract project ZIP
+      - name: Extract and find project
         run: |
+          ls -la
           unzip -o -q MLToolkitTraining-cloud-build.zip
-          chmod +x MLToolkitTraining/gradlew
+          ls -la
+          find . -name "gradlew" -type f
+          chmod +x $(find . -name "gradlew" -type f)
 
       - uses: gradle/actions/setup-gradle@v5
 
       - name: Build APK
         run: |
-          cd MLToolkitTraining
-          ./gradlew assembleDebug --no-daemon
+          GRADLE_DIR=$(dirname $(find . -name "gradlew" -type f | head -n 1))
+          echo "Building in $GRADLE_DIR"
+          cd $GRADLE_DIR
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - uses: actions/upload-artifact@v5
         with:
           name: MLToolkitTraining-debug-apk
-          path: MLToolkitTraining/app/build/outputs/apk/debug/app-debug.apk
+          path: "**/app/build/outputs/apk/debug/app-debug.apk"
